@@ -1,7 +1,7 @@
 class DataModel {
   String status;
-  String stocksamount;
-  String profitloss;
+  double stocksamount;
+  double profitloss;
   DataModel(
     this.status,
     this.stocksamount,

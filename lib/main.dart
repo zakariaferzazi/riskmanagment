@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 import 'DataModel.dart';
@@ -15,9 +13,7 @@ List? losing;
 var price = TextEditingController();
 var stoploss = TextEditingController();
 
-
-
-List<DataModel>? AllData;
+List<DataModel> Data = [];
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -27,49 +23,113 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
       home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-void calculate_loss(double price, double stoploss) {
-  var amountofstocks = 100 / price;
-  var lossamount = price - stoploss;
-  var allloss = lossamount * amountofstocks;
-  AllData!
-      .add(DataModel("Loss", "${amountofstocks}", "${allloss}"));
-}
-
-void calculate_profit(double price, double stoploss) {
-  var amountofstocks = 100 / price;
-  var lossamount = price - stoploss;
-  var allloss = lossamount * amountofstocks;
-  var profit = allloss * 1.5;
-  var profitamount = profit / amountofstocks;
-  var takeprofit = price + profitamount;
-  print(takeprofit);
-  AllData!.add(
-      DataModel("Profit", amountofstocks.toString(), profitamount.toString()));
-}
+double netprofit = 0;
+int losingtrade = 0;
+int winningtrade = 0;
+int alltrade = 0;
+double winningrate = 0;
 
 class _MyHomePageState extends State<MyHomePage> {
+  void calculate_loss(double price, double stoploss) {
+    var amountofstocks = 100 / price;
+    var lossamount = price - stoploss;
+    var allloss = lossamount * amountofstocks;
+
+    setState(() {
+      Data.add(DataModel("Loss", amountofstocks, allloss));
+      netprofit = netprofit - allloss;
+      losingtrade = losingtrade + 1;
+      alltrade = alltrade +1;
+      winningrate =winningtrade/alltrade*100;
+    });
+  }
+
+  void calculate_profit(double price, double stoploss) {
+    var amountofstocks = 100 / price;
+    var lossamount = price - stoploss;
+    var allloss = lossamount * amountofstocks;
+    var profit = allloss * 1.5;
+    var profitamount = profit / amountofstocks;
+    var takeprofit = price + profitamount;
+
+    setState(() {
+      Data.add(DataModel("Profit", amountofstocks, profit));
+      netprofit = netprofit + profit;
+      winningtrade = winningtrade + 1;
+      alltrade = alltrade +1;
+      winningrate =winningtrade/alltrade*100;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(72),
+        child: Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(3),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                          color: netprofit >= 0 ? Colors.green : Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: Center(
+                          child: Text(
+                        netprofit >= 0 ? "Winner" : "Loser",
+                        style: TextStyle(color: Colors.white),
+                      )))),
+              Expanded(
+                  child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                          // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: Center(
+                          child: Text(
+                        "Winning Rate : ${winningrate.toStringAsFixed(0)}%",
+                        style: TextStyle(color: Colors.black.withOpacity(0.7)),
+                      )))),
+              Expanded(
+                  child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                          // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: Center(
+                          child: Row(
+                        children: [
+                          Text(
+                            "Final Profit : ",
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.7),
+                            ),
+                          ),
+                          Text(
+                            netprofit.toStringAsFixed(2),
+                            style: TextStyle(
+                              color: netprofit >= 0 ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ))))
+            ],
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -149,30 +209,114 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          const Row(
-            children: [
-              Text("Win Rate %  -"),
-              Text("  Total Trades  -"),
-              Text("  Winning Trades  -"),
-              Text("  Losing Trades")
-            ],
-          ),
+          Card(
+              margin: EdgeInsets.only(right: 20, left: 20, top: 5, bottom: 5),
+              elevation: 20,
+              child: Container(
+                padding: EdgeInsets.all(3),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                        child: Container(
+                            padding: EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                                color: Colors.purple,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            child: Center(
+                                child: Text(
+                              "Status",
+                              style: TextStyle(color: Colors.white),
+                            )))),
+                    Expanded(
+                        child: Container(
+                            padding: EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                                // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            child: Center(
+                                child: Text(
+                             "Stocks Amount",
+                              style: TextStyle(
+                                  color: Colors.black.withOpacity(0.7)),
+                            )))),
+                    Expanded(
+                        child: Container(
+                            padding: EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                                // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            child: Center(
+                                child: Text(
+                                  "Net Profit : ",
+                                  style: TextStyle(
+                                    color: Colors.black.withOpacity(0.7),
+                                  ),
+                                ),)))
+                  ],
+                ),
+              )),
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: AllData!.length,
+              itemCount: Data.length,
               itemBuilder: (BuildContext context, int index) {
                 return Card(
-                    margin: EdgeInsets.all(5),
+                    margin:
+                        EdgeInsets.only(right: 20, left: 20, top: 5, bottom: 5),
                     elevation: 20,
                     child: Container(
-                      padding: EdgeInsets.all(10),
-                      child: const Row(
+                      padding: EdgeInsets.all(3),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Win Rate %  -"),
-                          Text("  Total Trades  -"),
-                          Text("  Winning Trades  -"),
-                          Text("  Losing Trades")
+                          Expanded(
+                              child: Container(
+                                  padding: EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                      color: Data[index].status == "Profit"
+                                          ? Colors.green
+                                          : Colors.red,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Center(
+                                      child: Text(
+                                    Data[index].status,
+                                    style: TextStyle(color: Colors.white),
+                                  )))),
+                          Expanded(
+                              child: Container(
+                                  padding: EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                      // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Center(
+                                      child: Text(
+                                    Data[index].stocksamount.toStringAsFixed(2),
+                                    style: TextStyle(color: Colors.purple),
+                                  )))),
+                          Expanded(
+                              child: Container(
+                                  padding: EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                      // color: Data[index].status == "Profit" ? Colors.green : Colors.red,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Center(
+                                      child: Text(
+                                    Data[index].status == "Profit"
+                                        ? "+${Data[index].profitloss.toStringAsFixed(2)}"
+                                        : "-${Data[index].profitloss.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      color: Data[index].status == "Profit"
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                  ))))
                         ],
                       ),
                     ));
@@ -181,12 +325,6 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.green,
-        tooltip: 'Increment',
-        child: const Icon(Icons.done),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
