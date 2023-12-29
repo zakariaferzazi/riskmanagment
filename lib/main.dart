@@ -251,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     BorderRadius.all(Radius.circular(20))),
                             child: Center(
                                 child: Text(
-                                  "Net Profit : ",
+                                  "Net Profit",
                                   style: TextStyle(
                                     color: Colors.black.withOpacity(0.7),
                                   ),
